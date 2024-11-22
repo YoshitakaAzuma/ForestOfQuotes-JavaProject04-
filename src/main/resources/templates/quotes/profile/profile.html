@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta charset="UTF-8">
+    <title>マイプロフィール</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .profile-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .profile-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 20px;
+        }
+		.myprofile-image {
+	        width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 20px;
+        }
+        .myprofile-image:hover {
+            transform: scale(1.05);
+		        }
+        .profile-info {
+            margin-bottom: 15px;
+        }
+        .profile-info label {
+            font-weight: bold;
+            display: inline-block;
+            width: 140px;
+        }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+		.logout-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            background-color: #e74c3c;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .logout-button:hover {
+            background-color: #c0392b;
+        }
+		.follow-button {
+		           background-color: #3498db;
+		           color: white;
+		           border: none;
+		           padding: 10px 15px;
+		           border-radius: 5px;
+		           cursor: pointer;
+		           transition: all 0.3s ease;
+		       }
+		       .follow-button:hover {
+		           background-color: #2980b9;
+		       }
+		       .unfollow-button {
+		           background-color: white;
+		           color: #3498db;
+		           border: 2px solid #3498db;
+		           padding: 8px 13px;
+		           border-radius: 5px;
+		           cursor: pointer;
+		           transition: all 0.3s ease;
+		       }
+		       .unfollow-button:hover {
+		           background-color: #f8f8f8;
+		           color: #2980b9;
+		           border-color: #2980b9;
+		       }
+			   /* モーダルのスタイル */
+			   .modal {
+			       display: none; /* 最初は非表示 */
+			       position: fixed; /* 画面上に固定 */
+			       z-index: 1; /* コンテンツより前面に */
+			       left: 0;
+			       top: 0;
+			       width: 100%; /* 幅は画面全体 */
+			       height: 100%; /* 高さも画面全体 */
+			       overflow: auto; /* スクロール可能に */
+			       background-color: rgb(0,0,0); /* 背景色 */
+			       background-color: rgba(0,0,0,0.4); /* 透明度 */
+			   }
+			   
+			   /* モーダルコンテンツのスタイル */
+			   .modal-content {
+			       background-color: #fefefe;
+			       margin: 15% auto; /* 上下左右中央に配置 */
+			       padding: 20px;
+			       border: 1px solid #888;
+			       width: 80%; /* コンテンツの幅 */
+			   }
+			   
+			   /* クローズボタンのスタイル */
+			   .close {
+			       color: #aaa;
+			       float: right;
+			       font-size: 28px;
+			       font-weight: bold;
+			   }
+			   
+			   .close:hover,
+			   .close:focus {
+			       color: black;
+			       text-decoration: none;
+			       cursor: pointer;
+			   }
+			   .more-options-button {
+			       background: none;
+			       border: none;
+			       font-size: 20px;
+			       cursor: pointer;
+			       padding: 5px 10px;
+			       position: absolute;
+			       top: 20px;
+			       right: 20px;
+			       color: #333; /* ボタンの色 */
+				   transform: rotate(90deg); /* 90度回転 */
+			   }
+			   
+			   .more-options-button:hover {
+			       background-color: rgba(0, 0, 0, 0.1);
+			       border-radius: 50%;
+			   }
+	    </style>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		</head>
+		<body>
+		    <div class="profile-container">
+				<!-- MyProfileのとき -->
+				<div th:if="${myprofile}">
+					
+					<a href="/quotes" class="back-button">戻る</a>
+			        <form th:action="@{/logout}" method="post">
+			            <button type="submit" class="logout-button">ログアウト</button>
+		      	  	</form>
+		        	<h1>マイプロフィール</h1>
+		        	<a th:href="@{/quotes/profile/edit}"><img th:src="${image}" alt="プロフィール画像" class="myprofile-image"></a>
+					<div class="profile-info">
+			            <label>ユーザー名:</label>
+			            <span th:text="${username}">ユーザー名</span>
+			        </div>
+					
+					<form id="follow" th:action="@{/quotes/profile/followlist}" method="get">
+						<input type="hidden" name="userId" th:value="${profile.user_id}">
+						<a href="#" th:onclick="|document.getElementById('follow').submit(); return false;|">
+							フォロー：[[${follow}]]
+						</a>
+					</form>
+					<form id="follower" th:action="@{/quotes/profile/followerlist}" method="get">
+						<input type="hidden" name="userId" th:value="${profile.user_id}">
+						<a href="#" th:onclick="|document.getElementById('follower').submit(); return false;|">
+							フォロワー：[[${follower}]]
+						</a>
+					</form>
+			        <div th:if="${favoriteQuotes}" class="profile-info">
+				        <label>お気に入りの名言</label>
+				        <p th:text="${favoriteQuotes.quotes}"></p>
+			    	    <p>発言者：<span th:text="${favoriteQuotes.whose}"></span></p>
+								
+						<form th:action="@{/quotes/profile/cancell-favorite}" method="get" >
+							<button type="submit">お気に入り登録解除</button>
+						</form>
+										
+				    </div>
+				    <div th:unless="${favoriteQuotes}">
+					    <label>お気に入りの名言</label>
+						<span>お気に入りの名言を登録しよう！</span>
+				    </div>
+					<form th:action="@{/quotes/profile/quoteslist}" method="get">
+						<button type="submit" >作成した名言</button>
+					</form>
+					<br>
+					<a th:href="@{/quotes/profile/goodlist}">いいね一覧</a>					
+				</div>
+				<!-- OtherPrifileのとき -->
+				<div th:unless="${myprofile}">
+					
+					<a href="#" class="back-button" onclick="event.preventDefault(); window.history.back();">戻る</a>
+			        
+					<h1>プロフィール</h1>
+			        <img th:src="${image}" alt="プロフィール画像" class="profile-image">
+			        <div class="profile-info">
+			            <label>ユーザー名:</label>
+			            <span th:text="${username}">ユーザー名</span>
+			        </div>
+					<!-- 通報タグ -->
+					<button class="more-options-button">&#8942;</button>
+					<!-- モーダル本体 -->
+					<div id="myModal" class="modal">
+					    <div class="modal-content">
+					        <span class="close">&times;</span>
+					        <p>ここにポップアップの内容が入ります。</p>
+							<br>
+							<br>
+							<br>
+							<br>
+							<br>
+							<br>
+					    </div>
+					</div>
+					<!-- フォロー関係 -->
+					<div th:unless="${mine}">
+						<div th:if="${isFollowing}">
+			               <button class="unfollow-button" th:attr="data-id=${profile.user_id}">フォロー解除</button>
+			           </div>
+		    	       <div th:unless="${isFollowing}">
+		        	       <button class="follow-button" th:attr="data-id=${profile.user_id}">フォロー</button>
+		           		</div>
+					</div>
+					<form id="follow" th:action="@{/quotes/profile/followlist}" method="get">
+						<input type="hidden" name="userId" th:value="${profile.user_id}">
+						<a href="#" th:onclick="|document.getElementById('follow').submit(); return false;|">
+							フォロー：[[${follow}]]
+						</a>
+					</form>
+					<form id="follower" th:action="@{/quotes/profile/followerlist}" method="get">
+						<input type="hidden" name="userId" th:value="${profile.user_id}">
+						<a href="#" th:onclick="|document.getElementById('follower').submit(); return false;|">
+							フォロワー：[[${follower}]]
+						</a>
+					</form>
+					
+			        <div th:if="${favoriteQuotes}" class="profile-info">
+			            <label>お気に入りの名言</label>
+			            <p th:text="${favoriteQuotes.quotes}"></p>
+			            <p>発言者：[[${favoriteQuotes.whose}]]
+						  <span th:if="${favoriteQuotes.whose_detail}">（ [[${favoriteQuotes.whose_detail}]] ）</span>
+						</p>
+						
+			        </div>
+			        <div th:unless="${favoriteQuotes}">
+			            <label>お気に入りの名言</label>
+			            <span>お気に入りの名言は登録されていません</span>
+			        </div>
+					
+					<form th:action="@{/quotes/profile/quoteslist}" method="get">
+						<input type="hidden" name="userId" th:value="${profile.user_id}">
+						<button type="submit" >[[${username}]]が作成した名言</button>
+					</form>
+					
+				</div>
+				
+		    </div>
+			<script>
+				$(document).ready(function() {
+		            $('.follow-button, .unfollow-button').on('click', function() {
+		                var button = $(this);
+		                var followId = button.data('id');
+		                var token = $("meta[name='_csrf']").attr("content");
+		                var header = $("meta[name='_csrf_header']").attr("content");
+		
+		                $.ajax({
+		                    url: '/quotes/api/toggle-follow',
+		                    method: 'get',
+		                    data: { follow_id: followId },
+		                    beforeSend: function(xhr) {
+		                        xhr.setRequestHeader(header, token);
+		                    },
+		                    success: function(response) {
+		                        if(response.followed) {
+		                            button.removeClass('follow-button').addClass('unfollow-button');
+		                            button.text('フォロー解除');
+		                        } else {
+		                            button.removeClass('unfollow-button').addClass('follow-button');
+		                            button.text('フォロー');
+		                        }
+		                    },
+		                    error: function() {
+		                        alert('フォローの更新中にエラーが発生しました。');
+		                    }
+		                });
+		            });
+		        });
+				$(document).ready(function() {
+				    $('.more-options-button').on('click', function() {
+				        var modal = document.getElementById("myModal");
+				        var span = document.getElementsByClassName("close")[0];
+				
+				        // モーダルを表示
+				        modal.style.display = "block";
+				
+				        // (x) がクリックされた時にモーダルを閉じる
+				        span.onclick = function() {
+				            modal.style.display = "none";
+				        }
+				
+				        // モーダルの外側がクリックされた時にモーダルを閉じる
+				        window.onclick = function(event) {
+				            if (event.target == modal) {
+				                modal.style.display = "none";
+				            }
+				        }
+				    });
+				});
+
+						
+			</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja"xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Warning</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .warning-container {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            text-align: center;
+        }
+        .warning-message {
+            color: #d9534f;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        button, a {
+            display: inline-block;
+            margin: 10px;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #4cae4c;
+        }
+        a {
+            background-color: #f0ad4e;
+            color: white;
+            border: none;
+        }
+        a:hover {
+            background-color: #ec971f;
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-container">
+        <div class="warning-message">
+            入力内容に不適切な単語が含まれている可能性がAIによって検出されました。ユーザーの通報を受けると、一部利用制限及び永久バンになる恐れがあります。内容に問題なければ続行してください。
+        </div>
+        <form th:action="@{/quotes/create/executioncreate}" method="post">
+            <input type="hidden" name="quotes" th:value="${form.quotes}" />
+            <input type="hidden" name="whose" th:value="${form.whose}" />
+			<input type="hidden" name="whose_detail" th:value="${form.whose_detail}">
+			<input type="hidden" name="category" th:value="${form.category}">
+            <button type="submit">登録続行する</button>
+        </form>
+        <a href="/quotes/create">戻る</a>
+    </div>
+</body>
+</html>

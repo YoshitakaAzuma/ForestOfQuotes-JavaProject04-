@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quotes.app.repoditory.QuotesMapper">
+
+	<select id="selectAllQuotesListByUserId" resultType="com.quotes.app.entity.Quotes">
+		select * from quotes where user_id = #{user_id}
+	</select>
+	
+	<select id="selectMineQuotesListByUserId" resultType="com.quotes.app.entity.Quotes">
+		select * from quotes where user_id = #{user_id} and mine = true
+	</select>
+	
+	<select id="selectMaxId">
+		select max(id) from quotes
+	</select>
+	
+	<select id="selectById" resultType="com.quotes.app.entity.Quotes">
+		select * from quotes where id = #{id}
+	</select>
+	
+	<insert id="insert" parameterType="com.quotes.app.entity.Quotes">
+		insert into quotes (quotes, category, whose, whose_detail, user_id , mine, good, created_at)
+		values (#{quotes}, #{category}, #{whose}, #{whose_detail}, #{user_id} ,#{mine}, 0, current_timestamp)
+	</insert>
+	
+	<update id="updateGood">
+		update quotes set good = #{good} where id = #{id}
+	</update>
+	
+	<delete id="deleteQuotesByQuotesId">
+		delete from quotes where id = #{id}
+	</delete>
+	
+	
+
+
+</mapper>

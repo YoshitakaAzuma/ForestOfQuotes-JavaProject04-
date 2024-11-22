@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Submit Form</title>
+</head>
+<body>
+<form id="autoSubmitForm" th:action="@{/quotes/create/executioncreate}" method="post">
+    <input type="hidden" name="quotes" th:value="${form.quotes}" />
+	<input type="hidden" name="category" th:value="${form.category}">
+    <input type="hidden" name="whose" th:value="${form.whose}" />
+	<input type="hidden" name="whose_detail" th:value="${form.whose_detail}">
+	<input type="hidden" name="mine" th:value="${form.mine}"/>
+</form>
+<script>
+    document.getElementById('autoSubmitForm').submit();
+</script>
+</body>
+</html>

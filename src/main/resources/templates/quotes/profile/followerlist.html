@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>フォロワー</title>
+</head>
+<body>
+	<h3>フォロワー</h3>
+	<div th:if="${userList == null || userList.empty}">
+			<p>フォロワーはいません</p>
+		</div>
+		<div th:if="${userList}" th:each="user : ${userList}">
+			<form id="myForm" th:action="@{/quotes/profile}"} method="get">
+				<input type="hidden" name="userId" th:value="${user.id}">
+				<a href="#" onclick="document.getElementById('myForm').submit(); return false;">[[${user.username}]]</a>
+			</form>
+			
+			
+		</div>
+		
+		<a href="#" class="back-button" onclick="event.preventDefault(); window.history.back();">戻る</a>
+	
+
+</body>
+</html>

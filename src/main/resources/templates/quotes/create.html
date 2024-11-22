@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>名言を作る</title>
+    <script>
+        function toggleWhoseInput() {
+            var whoseInput = document.getElementById('whoseInput');
+            var whoseInputDetail = document.getElementById('whoseInputDetail'); // 詳細入力用IDを取得
+            var mineCheckbox = document.getElementById('mineCheckbox');
+
+            whoseInput.disabled = mineCheckbox.checked;
+            whoseInputDetail.disabled = mineCheckbox.checked; // 詳細入力も無効化
+
+            if (mineCheckbox.checked) {
+                whoseInput.value = '';
+                whoseInputDetail.value = ''; // チェック時に詳細入力もクリア
+            }
+        }
+
+        function handleSubmit(action) {
+            var form = document.getElementById('myForm');
+            form.action = action;
+
+            // CSRFトークンをフォームに追加
+            var csrfToken = document.createElement('input');
+            csrfToken.setAttribute('type', 'hidden');
+            csrfToken.setAttribute('name', '[[${_csrf.parameterName}]]');
+            csrfToken.setAttribute('value', '[[${_csrf.token}]]');
+            form.appendChild(csrfToken);
+
+            form.submit();
+        }
+
+        // ページが読み込まれたときに実行
+        window.onload = function() {
+            toggleWhoseInput();
+        }
+    </script>
+</head>
+<body>
+    <h3 th:if="${message}" th:text="${message}" style="color: blue">
+        作成成功メッセージ
+    </h3>
+    
+    <h1>名言を作る</h1>
+    <form id="myForm" method="post">
+        <h3>名言</h3>
+        <textarea name="quotes" rows="4" cols="40" th:field="${quotesForm.quotes}"></textarea>
+        <span th:if="${quoteserror}" th:text="${quoteserror}" style="color: red">
+            エラーメッセージ
+        </span>
+        
+        <h3>発言者</h3>
+        <input type="checkbox" id="mineCheckbox" name="mine" th:checked="${quotesForm.mine}" onchange="toggleWhoseInput()">
+        <label for="mineCheckbox">自分の名言として登録する</label>
+        <br>
+        <input id="whoseInput" name="whose" type="text" th:field="${quotesForm.whose}">
+        <span>発言者の補足：</span>
+        <input id="whoseInputDetail" name="whose_detail" type="text" th:field="${quotesForm.whose_detail}">
+        <span th:if="${whoseerror}" th:text="${whoseerror}" style="color: red">
+            エラーメッセージ
+        </span>
+        <!-- カテゴリの選択 -->
+        <h3>カテゴリ</h3>
+        <button type="button" onclick="handleSubmit('/quotes/create/gptsupport')">AIのカテゴライズサポート</button>
+        <div th:if="${gptSupport}" th:text="${gptSupport}">
+        </div>
+        <span th:if="${whose_detailerror}" th:text="${whose_detailerror}" style="color: red">
+            エラーメッセージ
+        </span>
+        <input type="radio" name="category" value="1" id="1">
+        <label for="1">人生と生き方</label>
+        <input type="radio" name="category" value="2" id="2">
+        <label for="2">成功と挑戦</label>
+        <input type="radio" name="category" value="3" id="3">
+        <label for="3">愛と人間関係</label>
+        <input type="radio" name="category" value="4" id="4">
+        <label for="4">知恵と学び</label>
+        <input type="radio" name="category" value="5" id="5">
+        <label for="5">希望と勇気</label>
+        <br>
+        <button type="button" onclick="handleSubmit('/quotes/create/checkcontents')">登録</button>
+    </form>
+    
+    <a href="/quotes">タイトル画面へ</a>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quotes.app.repoditory.UserMapper">
+
+	<select id="getUserEntityByUsername" resultType="com.quotes.app.entity.UserEntity">
+		select * from users where username = #{username}
+	</select>
+	
+	<select id="getUserEntityByEmail" resultType="com.quotes.app.entity.UserEntity">
+		select * from users where email = #{email}
+	</select>
+	
+	<select id="getLimitedPeriodById" resultType="java.time.LocalDate" >
+		select limited_period from users where id = #{id}
+	</select>
+	
+	<select id="getUserEntityById" resultType="com.quotes.app.entity.UserEntity">
+		select * from users where id = #{id}
+	</select>
+	
+	<insert id="insertUSER" >
+		insert into users (username, password_hash, email, authority, banned)
+		values (#{username}, #{password_hash}, #{email}, 'USER', #{banned})
+	</insert>
+	
+	<update id="updateLimitedPeriodById">
+		update users set limited_period = #{limited_period} where id = #{id}
+	</update>
+	
+	<update id="updateBanById">
+		update users set banned = true where id = #{id}
+	</update>
+	
+	
+	
+	
+	
+	
+	
+</mapper>

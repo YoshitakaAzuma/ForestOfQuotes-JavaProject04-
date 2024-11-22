@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6">
+<head>
+    <meta charset="UTF-8">
+    <title>名言の森</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            text-align: center;
+            padding: 50px;
+            position: relative;
+            min-height: 100vh;
+        }
+        h1 {
+            font-size: 4em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .a {
+            display: inline-block;
+            margin: 15px;
+            padding: 12px 24px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            border: 2px solid #fff;
+            font-weight: bold;
+        }
+        a:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        hr {
+            margin: 40px auto;
+            border: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.3);
+            width: 60%;
+        }
+        .content {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+        }
+		.profile-icon {
+				            position: absolute;
+				            top: 20px;
+				            right: 20px;
+				            width: 80px;
+				            height: 80px;
+				            border-radius: 50%;
+				            cursor: pointer;
+				            transition: all 0.3s ease;
+				            overflow: hidden;
+				            border: 2px solid #fff;
+				            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+				        }
+		        .profile-icon:hover {
+		            transform: scale(1.1);
+		        }
+		        .profile-icon img {
+		            width: 100%;
+		            height: 100%;
+		            object-fit: cover;
+		        }
+		    </style>
+		</head>
+		<body>
+		    <div class="content">
+		        <h1>名言の森</h1>
+		        <a class="a" href="/quotes/showmenu">名言を探しに行く</a>
+		        <hr>
+		        <a class="a" href="/quotes/create">名言を作る</a>
+		    </div>
+		
+		    <a href="/quotes/profile" class="profile-icon">
+		        <img th:src="${image}" alt="プロフィール画像">
+		    </a>
+</body>
+</html>

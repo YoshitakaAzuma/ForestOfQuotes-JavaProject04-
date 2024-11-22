@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quotes.app.repoditory.GoodMapper">
+	
+	<select id="selectByUserId" resultType="com.quotes.app.entity.Good">
+		select * from goods where user_id = #{user_id}
+	</select>
+	
+	<select id="selectByQuotesId">
+		select * from goods where quotes_id = #{quotes_id}
+	</select>
+	
+	<select id="selectByUserIdAndQuotesId" resultType="com.quotes.app.entity.Good">
+		select * from goods where user_id = #{user_id} and quotes_id = #{quotes_id}
+	</select>
+	
+	<insert id="insertGood">
+		insert into goods (user_id, quotes_id) values (#{user_id}, #{quotes_id})
+	</insert>
+	
+	<delete id="deleteGood">
+		delete from goods where user_id = #{user_id} and quotes_id = #{quotes_id}
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quotes.app.repoditory.ProfileMapper">
+	
+	<select id="getProfileByUserId" resultType="com.quotes.app.entity.Profile">
+		select * from profiles where user_id = #{user_id}
+	</select>
+	
+	<insert id="insertProfile">
+		insert into profiles (user_id, favorite_quotes_id, image_file_name, follow, follower)
+		values (#{user_id},#{favorite_quotes_id}, #{image_file_name}, 0, 0)
+	</insert>
+	
+	<update id="updateProfile">
+		update profiles set favorite_quotes_id = #{favorite_quotes_id}, follow = #{follow}, follower = #{follower}, image_file_name = #{image_file_name}
+		where user_id = #{user_id}
+	</update>
+	
+	
+	
+</mapper>

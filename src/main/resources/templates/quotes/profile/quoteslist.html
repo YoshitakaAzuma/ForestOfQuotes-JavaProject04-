@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="_csrf" th:content="${_csrf.token}"/>
+<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+<meta charset="UTF-8">
+<title>Quotes</title>
+<style>
+        .heart-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.5s ease, transform 0.5s ease;
+        }
+        .heart-button.liked {
+            color: red;
+            animation: heartBeat 0.3s ease-in-out;
+        }
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.3); }
+            50% { transform: scale(0.9); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+</style>
+</head>
+<body>
+	<h3>[[${username}]]が登録した名言</h3>
+	<div th:if="${quotes == null || quotes.empty}">
+		<p>登録された名言がありません</p>
+	</div>
+	<div th:if="${quotes}" th:each="quote : ${quotes}">
+		<span th:text="${quote.quotes}"></span>
+		<span th:if="${quote.mine}">
+			<form id="myForm" th:action="@{/quotes/profile}" method="get">
+				<input type="hidden" name="userId" th:value="${quote.user_id}">
+				<a href="#" onclick="document.getElementById('myForm').submit(); return false;">[[${quote.whose}]]</a>
+			</form>
+		</span>
+		<span th:unless="${quote.mine}" th:text="${quote.whose}"></span>
+		
+		<!-- 同様に、こちらのフォームのIDも動的に -->
+	    <form th:id="'gooduser' + ${quote.id}" th:action="@{/quotes/profile/gooduser}" method="get">
+	        <input type="hidden" name="quotesId" th:value="${quote.id}">
+	        <!-- 正しいフォームIDを呼び出し -->
+			<a href="#" th:onclick="|document.getElementById('gooduser' + ${quote.id}).submit(); return false;|">
+			    いいね：[[${quote.good}]]
+			</a>
+	    </form>
+		<!-- 既にいいねされているとき -->
+		<div th:if="${quote.existsGood}">
+			<button class="heart-button liked" th:attr="data-id=${quote.id}">❤</button>
+		</div>
+		<!-- いいねされていないとき -->
+		<div th:unless="${quote.existsGood}">
+			<button class="heart-button" th:attr="data-id=${quote.id}">❤</button>
+		</div>
+		<button th:if="${mine}" class="delete-button" th:attr="data-id=${quote.id}">削除</button>
+	</div>
+	<a href="#" class="back-button" onclick="event.preventDefault(); window.history.back();">戻る</a>
+
+	
+	
+	<!-- JavaScript -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+		<script>
+		$(document).ready(function() {
+		    $('.heart-button').on('click', function() {
+		        var button = $(this);
+		        var quoteId = button.data('id');
+		        var token = $("meta[name='_csrf']").attr("content");
+		        var header = $("meta[name='_csrf_header']").attr("content");
+		
+		        $.ajax({
+		            url: '/quotes/api/toggle-like',
+		            method: 'GET',
+		            data: { quotes_id: quoteId },
+		            beforeSend: function(xhr) {
+		                xhr.setRequestHeader(header, token);
+		            },
+		            success: function(response) {
+		                if(response.liked) {
+		                    button.addClass('liked');
+		                } else {
+		                    button.removeClass('liked');
+		                }
+		            },
+		            error: function() {
+		                alert('エラーが発生しました。');
+		            }
+		        });
+		    });
+			// 削除機能のスクリプト
+	        $('.delete-button').on('click', function() {
+	            var button = $(this);
+	            var quoteId = button.data('id');
+	            var token = $("meta[name='_csrf']").attr("content");
+	            var header = $("meta[name='_csrf_header']").attr("content");
+	
+	            if (confirm('本当にこの名言を削除しますか？')) {
+	                $.ajax({
+	                    url: '/quotes/api/delete',
+	                    method: 'get',
+	                    data: { quotes_id: quoteId },
+	                    beforeSend: function(xhr) {
+	                        xhr.setRequestHeader(header, token);
+	                    },
+	                    success: function(response) {
+	                        if(response.deleted) {
+	                            // 削除成功時、該当の名言要素を画面から削除
+	                            button.closest('div').remove();
+	                        } else {
+	                            alert('削除に失敗しました。');
+	                        }
+	                    },
+	                    error: function() {
+	                        alert('エラーが発生しました。');
+	                    }
+	                });
+	            }
+	        });
+		});
+		</script>
+</body>
+</html>

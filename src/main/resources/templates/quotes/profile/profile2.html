@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>名言の森</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+        .container {
+            display: flex;
+            height: 100%;
+        }
+        .sidebar {
+            width: 228px;
+            background-color: #ffffff;
+            padding: 20px;
+            color: #333333;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+        .sidebar h2 {
+            text-align: left;
+            margin-bottom: 30px;
+			margin-left: 10px;
+            font-size: 24px;
+            color: #333333;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li, .sidebar form {
+            margin-bottom: 15px;
+        }
+        .sidebar a, .generation-btn {
+            text-decoration: none;
+            color: #333333;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .generation-btn {
+            background-color: #4CAF50;
+            color: white;
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            justify-content: center;
+            margin-top: 0;
+        }
+        .generation-btn:hover {
+            background-color: #45a049;
+        }
+        /* メインコンテンツのスタイル */
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+			height: 100%;
+            background-color: #fff;
+			overflow: hidden;
+			
+        }
+        /* 左側のコンテンツスタイル */
+        .left-content {
+            width: 57%;
+            padding: 20px;
+            border-right: 1px solid #e0e0e0;
+        }
+        /* 右側のコンテンツスタイル */
+        .right-content {
+			position: relative;
+            width: 43%;
+			height: 100%;
+			overflow: hidden;
+        }
+        /* タブボタンのスタイル */
+        .tab-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 1px;
+			z-index: 100;
+        }
+        .tab-buttons button {
+            padding: 10px;
+			z-index: 100;
+            cursor: pointer;
+			font-size: 20px;
+            border: 1px solid #e0e0e0;
+            background-color: #ffffff;
+            width: 50%; /* タブボタンを左右均等に */
+            transition: background-color 0.3s;
+        }
+        .tab-buttons button.active {
+			z-index: 100;
+            background-color: #4CAF50;
+            color: #fff;
+        }
+        /* タブコンテンツのスタイル */
+        .tab-content {
+            display: none;
+			max-height: calc(100% - 53px); /* 最大表示高さを設定 */
+			overflow-y: auto; /* スクロールバーを常に表示する */
+			scrollbar-gutter: stable; /* スクロールバーが表示されるときも横幅を固定 */
+        }
+        .tab-content.active {
+            display: block;
+        }
+        /* タブボタンの境界線 */
+        .tab-buttons button + button {
+            border-left: 1px solid #e0e0e0;
+        }
+		.quote-card {
+		        border: 1px solid #e0e0e0;
+		        padding: 30px;
+				padding-bottom: 5px;
+		        margin-bottom: 1px;
+		        box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+		        background-color: #fff;
+		        position: relative;
+		    }
+		
+		    .quote-content {
+		        text-align: center;
+		        font-size: 18px;
+		        margin-bottom: 10px;
+		    }
+		
+		    .quote-author {
+		        text-align: right;
+		        font-size: 16px;
+		        font-style: italic;
+		        color: #666;
+		        margin-bottom: 15px;
+		    }
+		
+		    .quote-footer {
+		        display: flex;
+		        justify-content: space-between;
+		        align-items: center;
+		        border-top: 1px solid #e0e0e0;
+		    }
+		
+		    .quote-actions {
+		        display: flex;
+		        align-items: center;
+		    }
+		
+		    .heart-button, .star-button {
+		        background: none;
+		        border: none;
+		        font-size: 24px;
+		        cursor: pointer;
+		        color: #ccc;
+		        transition: color 0.3s ease, transform 0.3s ease;
+		        margin-left: 15px;
+		    }
+		
+		    .heart-button.liked {
+		        color: red;
+		    }
+		
+		    .star-button.favorited {
+		        color: gold;
+		    }
+		
+			.ellipsis-button {
+			    position: absolute;
+			    top: 10px;
+			    right: 10px;
+			    background: none;
+			    border: none;
+			    cursor: pointer;
+			    padding: 5px;
+			    display: flex;
+			    align-items: center;
+			    justify-content: center;
+			}
+			
+			.ellipsis-button::before {
+			    content: '\2022\2022\2022';
+			    font-size: 12px;
+			    letter-spacing: 2px;
+			    color: #888;
+			}
+			
+			.ellipsis-button:hover::before {
+			    color: #333;
+			}
+			/* モーダルのスタイル */
+			.ellipsis-modal {
+			            display: none; /* デザイン確認のため表示する場合は 'block' に設定 */
+			            position: absolute;
+			            width: 200px;
+			            background-color: white;
+			            border: 1px solid #ccc;
+			            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+			            z-index: 1000;
+			            border-radius: 15px; /* 角を丸くする */
+						z-index: 80;
+			        }
+			
+			        .ellipsis-modal-content {
+			            padding: 0; /* コンテンツのパディングを調整 */
+			        }
+			
+			        .ellipsis-modal-content ul {
+			            list-style: none;
+			            padding: 0;
+			            margin: 0;
+			        }
+			
+			        .ellipsis-modal-content li {
+			            border-bottom: 1px solid #dcdcdc; /* 各項目の下に境界線を引く */
+			        }
+			
+			        .ellipsis-modal-content li:last-child {
+			            border-bottom: none; /* 最後の項目の境界線を消す */
+			        }
+			
+			        .ellipsis-modal-content button {
+			            width: 100%;
+			            padding: 15px 0;
+			            border: none;
+			            background: transparent;
+			            font-size: 18px;
+			            cursor: pointer;
+			            outline: none;
+			            transition: background-color 0.3s;
+			        }
+			
+			        .ellipsis-modal-content button:hover {
+			            background-color: #f0f0f0; /* ホバー時の背景色 */
+			        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <h2>名言の森</h2>
+            <ul>
+                <li><a href="#"><i class="fas fa-home"></i> HOME</a></li>
+                <li><a href="#"><i class="fas fa-compass"></i> DISCOVER</a></li>
+                <li><a href="#"><i class="fas fa-search"></i> EXPLORE</a></li>
+                <li><a href="#"><i class="fas fa-bell"></i> NOTIFICATION</a></li>
+                <li><a href="#"><i class="fas fa-chart-bar"></i> RANKING</a></li>
+                <li><a href="#"><i class="fas fa-award"></i> HONOR</a></li>
+                <li><a href="#"><i class="fas fa-user"></i> PROFILE</a></li>
+                <li>
+                    <form>
+                        <button type="submit" class="generation-btn">GENERATION</button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <!-- 左側のコンテンツ -->
+            <div class="left-content">
+                <h3>左側のコンテンツ</h3>
+                <p>ここには左側の情報を表示します。</p>
+            </div>
+            <!-- 右側のコンテンツ -->
+            <div class="right-content">
+                <!-- タブボタン -->
+                <div class="tab-buttons">
+                    <button class="tab-link active" data-tab="tab1">作成した名言</button>
+                    <button class="tab-link" data-tab="tab2">いいねした名言</button>
+                </div>
+                <!-- タブコンテンツ -->
+				<!-- tab1 作成した名言 -->
+                <div id="tab1" class="tab-content active">
+					<div th:if="${madeQuotesList == null || madeQuotesList.empty}">
+					       <p>登録された名言がありません</p>
+					   </div>
+					   <div th:if="${madeQuotesList}" th:each="quote : ${madeQuotesList}">
+					       <div class="quote-card">
+								<!-- 三点リーダー -->
+					           <button class="ellipsis-button" th:data-isFollowing="${followIdList.contains(quote.user_id)}?1:0" th:data-tab="1" th:data-nowUserId="${userId}" th:data-quotesId="${quote.id}" th:data-userId="${quote.user_id}"></button>
+							   
+					           <div class="quote-content" th:text="${quote.quotes}">
+					               名言
+					           </div>
+					           <div class="quote-author" th:text="${quote.whose}">
+								<span th:if="${quote.mine}">
+											<form id="myForm" th:action="@{/quotes/profile}" method="get">
+												<input type="hidden" name="userId" th:value="${quote.user_id}">
+												<a href="#" onclick="document.getElementById('myForm').submit(); return false;">[[${quote.whose}]]</a>
+											</form>
+										</span>
+										<span th:unless="${quote.mine}" th:text="${quote.whose}"></span>
+					           </div>
+					           <div class="quote-footer">
+					               <span>いいね：[[${quote.good}]]</span>
+					               <div class="quote-actions">
+					                   <button class="heart-button" th:classappend="${quote.existsGood} ? 'liked'" th:attr="data-id=${quote.id}">❤</button>
+					                   <button class="star-button" th:classappend="${quote.id == favoriteId} ? 'favorited'" th:attr="data-id=${quote.id}">★</button>
+					               </div>
+					           </div>
+					       </div>
+					   </div>
+					   
+                </div>
+				<!-- tab2 いいねした名言 -->
+                <div id="tab2" class="tab-content">
+					<div th:if="${goodQuotesList == null || goodQuotesList.empty}">
+				       <p>いいねした名言はありません</p>
+				   </div>
+				   <div th:if="${goodQuotesList}" th:each="quote : ${goodQuotesList}">
+				       <div class="quote-card">
+						<!-- モーダルボタン -->
+						<button class="ellipsis-button" th:data-isFollowing="${followIdList.contains(quote.user_id)}?1:0" data-tab="2" th:data-nowUserId="${userId}" th:data-quotesId="${quote.id}" th:data-userId="${quote.user_id}"></button>
+				           <div class="quote-content" th:text="${quote.quotes}">
+				               名言
+				           </div>
+				           <div class="quote-author">
+							<span th:if="${quote.mine}">
+										<form id="myForm" th:action="@{/quotes/profile}" method="get">
+											<input type="hidden" name="userId" th:value="${quote.user_id}">
+											<a href="#" onclick="document.getElementById('myForm').submit(); return false;">[[${quote.whose}]]</a>
+										</form>
+									</span>
+									<span th:unless="${quote.mine}" th:text="${quote.whose}" >hello</span>
+				           </div>
+				           <div class="quote-footer">
+				               <span>いいね：[[${quote.good}]]</span>
+				               <div class="quote-actions">
+				                   <button class="heart-button liked"  th:attr="data-id=${quote.id}">❤</button>
+				                   <button class="star-button" th:classappend="${quote.id == favoriteId} ? 'favorited'" th:attr="data-id=${quote.id}">★</button>
+				               </div>
+				           </div>
+				       </div>
+				   </div>
+                </div>
+            </div>
+			<!-- モーダル -->
+			<!-- モーダル要素 -->
+			<div class="ellipsis-modal" id="optionsModal">
+			   <div class="ellipsis-modal-content">
+			       <ul>
+					<li>
+						<button class="follow-button" id="follow-button" data-userId="">ユーザーをフォロー</button>
+					</li>
+					<li>
+						<button class="quotes-report-button" id="quotes-report-button" data-quotesId="">名言を報告</button>
+					</li>
+					<li>
+						<button class="block-button" id="block-button" data-userId="">ユーザーをブロック</button>
+					</li>
+					<li>
+						<button class="user-report-button" id="user-report-button" data-userId="">ユーザーを通報</button>
+					</li>
+		    	   </ul>
+			   </div>
+		   </div>
+		   <!-- 自分のプロフィールの時 -->
+			<div class="ellipsis-modal" id="mineOptionsModal">
+			   <div class="ellipsis-modal-content">
+			       <ul>
+					<li>
+						<button class="delete-button" id="delete-button" data-userId="">削除</button>
+					</li>
+					<li>
+						<button class="edit-button" id="edit-button" data-quotesId="">ジャンル変更</button>
+					</li>
+					<li>
+						<button class="good-user-button" id="good-user-button" data-userId="">いいねしたユーザー</button>
+					</li>
+					<li>
+						<button class="user-report-button" id="user-report-button" data-userId="">シェア</button>
+					</li>
+		    	   </ul>
+			   </div>
+		   </div>
+		   
+		   
+		   
+		   
+        </main>
+    </div>
+    <script>
+        // タブの切り替えスクリプト
+        document.querySelectorAll('.tab-link').forEach(button => {
+            button.addEventListener('click', () => {
+                const tabId = button.getAttribute('data-tab');
+
+                // タブボタンのアクティブ状態を切り替え
+                document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // タブコンテンツの表示を切り替え
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+		// 三点リーダーボタンを全て取得し、個別にクリックイベントを設定
+		document.addEventListener('DOMContentLoaded', function() {
+		    const modal = document.getElementById('optionsModal');
+			const mineModal = document.getElementById('mineOptionsModal');
+			const modalQuotesId = document.getElementById('quotesIdInput');
+			const modalUserId = document.getElementById('userIdInput');
+		    const ellipsisButtons = document.querySelectorAll('.ellipsis-button');
+			const tab1Content = document.getElementById('tab1');  // スクロール対象の要素を取得
+			const tab2Content = document.getElementById('tab2');
+			let modalTop = 0;
+			// モーダル上のボタン
+			const followButton = document.getElementById('follow-button');
+			const quotesReportButton = document.getElementById('quotes-report-button');
+			const blockButton = document.getElementById('block-button');
+			const userReportButton = document.getElementById('user-report-button');
+			
+			
+		    ellipsisButtons.forEach(button => {
+		        button.addEventListener('click', function(e) {
+		            e.stopPropagation(); // イベントの伝播を停止
+		            const rect = this.getBoundingClientRect();
+					let top = 0;
+					// モーダルの非表示
+					modal.style.display = 'none';
+					mineModal.style.display = 'none';
+					
+					// ボタンからデータを取得
+					const quotesId = this.getAttribute('data-quotesId');
+					const userId = this.getAttribute('data-userId');
+					const nowUserId = this.getAttribute('data-nowUserId');
+					const tab = this.getAttribute('data-tab');
+					const isFollowing = this.getAttribute('data-isFollowing')
+					
+					console.log(isFollowing);
+					// ellipsisボタンの位置によってtopを設定する
+					if(rect.top < (window.innerHeight/2)){
+						top = rect.top;
+					}else{
+						top = rect.top - 210;
+					}
+					
+					// モーダルに値を渡す
+					
+					if(userId == nowUserId){// 自分の名言の場合
+						
+						console.log('自分の名言')
+						
+						mineModal.style.display = 'block';
+						mineModal.style.top = top + 'px';
+						mineModal.style.left = (rect.right - 200) + 'px'; // 200px (モーダルの幅) + 100px
+						
+						
+					} else{// 自分以外の名言の時
+						
+						console.log('自分以外の名言')
+						
+						modal.style.display = 'block';
+						modal.style.top = top + 'px';
+						modal.style.left = (rect.right - 200) + 'px'; // 200px (モーダルの幅) + 100px
+						followButton.setAttribute('data-userId',userId);
+						quotesReportButton.setAttribute('data-quotesId',quotesId);
+						blockButton.setAttribute('data-userId', userId);
+						userReportButton.setAttribute('data-userId',userId);
+						
+						console.log(followButton.getAttribute('data-userId'));
+						
+						// フォローしているかしていないか
+						if(isFollowing == 1){
+							followButton.textContent = 'フォロー解除';
+						} else{
+							followButton.textContent = 'フォローする'
+						};
+						
+					};
+					
+					if(tab == 1){
+						modalTop = top + tab1Content.scrollTop;
+					} else if(tab == 2){
+						modalTop = top + tab2Content.scrollTop;
+					};
+					
+		        });
+		    });
+			
+			followButton.addEventListener('click',function(){
+				
+				console.log('フォローボタンイベント')
+				console.log(followButton.getAttribute('data-userId'));
+				
+				var followId = followButton.getAttribute('data-userId');  // data-id 属性からフォローIDを取得
+	            var token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+	            var header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+				
+				
+				console.log('ここ来てる');
+				
+	            // XMLHttpRequest オブジェクトを作成
+	            var xhr = new XMLHttpRequest();
+	            xhr.open('GET', '/quotes/api/toggle-follow?follow_id=' + followId, true);
+				
+	            // CSRF トークンの設定
+	            xhr.setRequestHeader(header, token);
+		
+	            // リクエストが成功したときの処理
+	            xhr.onload = function() {
+	                if (xhr.status >= 200 && xhr.status < 300) {
+	                    var response = JSON.parse(xhr.responseText);
+	                    if (response.followed) {
+	                        followButton.classList.remove('follow-button');
+	                        followButton.classList.add('unfollow-button');
+	                        followButton.textContent = 'フォロー解除';
+	                    } else {
+	                        followButton.classList.remove('unfollow-button');
+	                        followButton.classList.add('follow-button');
+	                        followButton.textContent = 'フォロー';
+	                    }
+	                } else {
+	                    alert('フォローの更新中にエラーが発生しました。');
+	                }
+	            };
+	
+	            // リクエストが失敗したときの処理
+	            xhr.onerror = function() {
+	                alert('フォローの更新中にエラーが発生しました。');
+	            };
+	
+	            // リクエストを送信
+	            xhr.send();
+			});
+			
+		
+		    // モーダル外をクリックしたときに閉じる
+		    document.addEventListener('click', function(e) {
+		        if (e.target !== modal && !modal.contains(e.target)) {
+		            modal.style.display = 'none';
+		            mineModal.style.display = 'none';
+		        }
+		        if (e.target !== mineModal && !mineModal.contains(e.target)) {
+		            modal.style.display = 'none';
+		            mineModal.style.display = 'none';
+		        }
+		    });
+		
+		    // スクロール時にモーダルの位置を調整
+			tab1Content.addEventListener('scroll', function() {
+		        if (modal.style.display === 'block' || 	mineModal.style.display === 'block') {
+					modal.style.top = (modalTop - tab1Content.scrollTop) + 'px';
+					mineModal.style.top = (modalTop - tab1Content.scrollTop) + 'px';
+		        }
+		    });
+			tab2Content.addEventListener('scroll', function() {
+		        if (modal.style.display === 'block' || mineModal.style.display === 'block') {
+					modal.style.top = (modalTop - tab2Content.scrollTop) + 'px';
+					mineModal.style.top = (modalTop - tab2Content.scrollTop) + 'px';
+		        }
+		    });
+		});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <meta charset="UTF-8">
+    <title>名言</title>
+	<style>
+        .heart-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .heart-button.liked {
+            color: red;
+            animation: heartBeat 0.3s ease-in-out;
+        }
+		.star-button {
+		    background: none;
+		    border: none;
+		    font-size: 20px; /* サイズを大きくして丸みを強調 */
+		    cursor: pointer;
+		    color: #ccc;
+		    transition: color 0.3s ease, transform 0.3s ease;
+		    text-shadow: 0 0 1px #999; /* 輪郭を少し柔らかくする */
+		}
+		.star-button.favorited {
+		    color: gold;
+		    text-shadow: 0 0 3px #FFD700; /* お気に入り時に輝きを追加 */
+		    animation: starBeat 0.3s ease-in-out;
+		}
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+		@keyframes starRotate {
+		    0% { transform: rotate(0deg); }
+		    100% { transform: rotate(360deg); }
+		}
+		@keyframes starShrinkExpandRotate {
+		    0% { transform: scale(1) rotate(0deg); }
+		    20% { transform: scale(0.8) rotate(0deg); }
+		    90% { transform: scale(1.2) rotate(360deg); }
+		    100% { transform: scale(1) rotate(360deg); }
+		}
+    </style>
+</head>
+<body>
+	<h3 th:text="${quotes.quotes}">
+		名言
+	</h3>
+	
+	
+	
+	
+	<!-- mine発言者 -->
+	<div th:if="${quotes.mine}" >
+		<form id="myForm" th:action="@{/quotes/profile}" method="get">
+			<input type="hidden" name="userId" th:value="${quotes.user_id}">
+			<a href="#" onclick="document.getElementById('myForm').submit(); return false;">[[${quotes.whose}]]</a>
+		</form>
+	</div>
+	<!-- 通常発言者 -->
+	<div th:unless="${quotes.mine}" th:text="${quotes.whose}">
+	</div>
+	
+	
+	
+	
+	<br>
+	<!-- いいね数 -->
+	<span>いいね:</span><span th:text="${quotes.good}"></span>
+	<!-- いいねボタン -->
+	<button class="heart-button" th:classappend="${existsGood} ? 'liked'" th:attr="data-id=${quotes.id}">❤</button>
+	<!-- お気に入りボタン -->
+    <button class="star-button" th:classappend="${quotes.id == favoriteId} ? 'favorited'" th:attr="data-id=${quotes.id}">★</button>
+	
+	<form th:action="@{/quotes/all/next}" th:method="get">
+		<input type="hidden" th:field="${quotes.id}">
+		<input type="submit" value="次の名言">
+	</form>
+	<a href="/quotes/showmenu">メニュー画面へ</a>
+	
+	
+	<!-- JavaScript -->
+	 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	 <script>
+		$(document).ready(function() {
+		    $('.heart-button').on('click', function() {
+		        var button = $(this);
+		        var quoteId = button.data('id');
+		        var token = $("meta[name='_csrf']").attr("content");
+		        var header = $("meta[name='_csrf_header']").attr("content");
+		
+		        $.ajax({
+		            url: '/quotes/api/toggle-like',
+		            method: 'GET',
+		            data: { quotes_id: quoteId },
+		            beforeSend: function(xhr) {
+		                xhr.setRequestHeader(header, token);
+		            },
+		            success: function(response) {
+		                if(response.liked) {
+		                    button.addClass('liked');
+		                } else {
+		                    button.removeClass('liked');
+		                }
+		            },
+		            error: function() {
+		                alert('エラーが発生しました。');
+		            }
+		        });
+		    });
+			$('.star-button').on('click', function() {
+			    var button = $(this);
+			    var quoteId = button.data('id');
+			    var token = $("meta[name='_csrf']").attr("content");
+			    var header = $("meta[name='_csrf_header']").attr("content");
+			
+			    $.ajax({
+			        url: '/quotes/api/toggle-favorite',
+			        method: 'GET',
+			        data: { quotes_id: quoteId },
+			        beforeSend: function(xhr) {
+			            xhr.setRequestHeader(header, token);
+			        },
+			        success: function(response) {
+			            if(response.favorited) {
+			                button.addClass('favorited');
+			                button.css('animation', 'starShrinkExpandRotate 0.7s ease-in-out');
+			            } else {
+			                button.removeClass('favorited');
+			                button.css('animation', 'starShrinkExpandRotate 0.7s ease-in-out reverse');
+			            }
+			            // アニメーション終了後にアニメーションプロパティをリセット
+			            setTimeout(function() {
+			                button.css('animation', '');
+			            }, 700);
+			        },
+			        error: function() {
+			            alert('エラーが発生しました。');
+			        }
+			    });
+			});
+		});
+	 </script>
+	</body>
+	</html>

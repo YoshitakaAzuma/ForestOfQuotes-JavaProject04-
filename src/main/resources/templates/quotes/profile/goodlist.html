@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+	
+	<!-- 恐らくトークンを取得とかしてる -->
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    
+	
+	<meta charset="UTF-8">
+    <title>いいね一覧</title>
+    <style>
+        .heart-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #ccc;
+        }
+        .heart-button.liked {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h3>いいねした名言一覧</h3>
+    <div th:if="${goodList == null || goodList.empty}">
+        <p>いいねした名言はありません</p>
+    </div> 
+    <div th:if="${goodList}" th:each="quote : ${goodList}">
+        <span th:text="${quote.quotes}"></span>
+		<span th:if="${quote.mine}">
+		        <!-- フォームのIDに動的値を設定 -->
+		        <form th:id="'myForm' + ${quote.id}" th:action="@{/quotes/profile}" method="get">
+		            <input type="hidden" name="userId" th:value="${quote.user_id}">
+		            <!-- 正しいフォームIDを呼び出し -->
+		            <a href="#" th:onclick="|document.getElementById('myForm' + ${quote.id}).submit(); return false;|">[[${quote.whose}]]</a>
+		        </form>
+		    </span>
+		    <span th:unless="${quote.mine}" th:text="${quote.whose}"></span>
+		    
+		    <!-- 同様に、こちらのフォームのIDも動的に -->
+		    <form th:id="'gooduser' + ${quote.id}" th:action="@{/quotes/profile/gooduser}" method="get">
+		        <input type="hidden" name="quotesId" th:value="${quote.id}">
+		        <!-- 正しいフォームIDを呼び出し -->
+		        <a href="#" th:onclick="|document.getElementById('gooduser' + ${quote.id}).submit(); return false;|">
+		            いいね：[[${quote.good}]]
+		        </a>
+		    </form>
+        <button class="heart-button liked" th:attr="data-id=${quote.id}">❤</button>
+    </div>
+	<a href="#" class="back-button" onclick="event.preventDefault(); window.history.back();">戻る</a>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+		$(document).ready(function() {
+		    $('.heart-button').on('click', function() {
+		        var button = $(this); // ボタンのjQueryオブジェクト
+		        var quoteId = button.data('id'); // ボタンからdata-id属性を取得
+				
+				
+				var token = $("meta[name='_csrf']").attr("content");
+				var header = $("meta[name='_csrf_header']").attr("content");
+				
+				
+				
+		        $.ajax({
+		            url: '/quotes/api/toggle-like', // APIエンドポイント
+		            method: 'get',
+		            data: { quotes_id: quoteId }, // サーバーに送信するデータ
+					beforeSend: function(xhr) {
+					        xhr.setRequestHeader(header, token);
+					    },
+					success: function(response) {
+		                if(response.liked) {
+		                    button.addClass('liked'); // いいね状態を反映
+		                } else {
+		                    button.removeClass('liked'); // いいねを解除する状態を反映
+		                }
+		            },
+		            error: function() {
+		                alert('エラーが発生しました。');
+		            }
+		        });
+		    });
+		});
+    </script>
+</body>
+</html>
